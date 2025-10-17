@@ -1,0 +1,19 @@
+customer_id,status,employer_name,industry,role,base_salary_annual,pay_frequency,variable_income_avg_mo,start_date
+C001,full_time,Globex,Healthcare,Consultant,110000,monthly,0,2025-10-12
+C002,full_time,Initech,Retail,Analyst,110000,biweekly,0,2025-10-12
+C003,full_time,Initech,Healthcare,Scientist,110000,monthly,300,2025-10-12
+C004,full_time,Acme Corp,Healthcare,Analyst,75000,monthly,100,2025-10-12
+C005,unemployed,Globex,Healthcare,Consultant,55000,monthly,0,2025-10-12
+C006,full_time,Stark Industries,Finance,Scientist,75000,monthly,0,2025-10-12
+C007,student,Stark Industries,Tech,Scientist,90000,monthly,0,2025-10-12
+C008,full_time,Umbrella,Finance,Consultant,65000,monthly,500,2025-10-12
+C009,part_time,Globex,Retail,Consultant,75000,biweekly,100,2025-10-12
+C010,full_time,Acme Corp,Finance,Consultant,65000,biweekly,100,2025-10-12
+C011,part_time,Stark Industries,Finance,Consultant,90000,biweekly,100,2025-10-12
+C012,contract,Umbrella,Retail,Consultant,125000,monthly,0,2025-10-12
+C013,full_time,Stark Industries,Healthcare,Engineer,75000,monthly,200,2025-10-12
+C014,student,Initech,Tech,Scientist,75000,monthly,0,2025-10-12
+C015,part_time,Stark Industries,Consulting,Associate,65000,monthly,0,2025-10-12
+C016,full_time,Acme Corp,Finance,Engineer,125000,biweekly,100,2025-10-12
+C017,full_time,Acme Corp,Consulting,Consultant,110000,biweekly,200,2025-10-12
+C018,part_time,Stark Industries,Finance,Associate,65000,monthly,200,2025-10-12
