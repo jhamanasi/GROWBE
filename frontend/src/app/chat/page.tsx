@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Send, Bot, User, Sparkles, DollarSign, ArrowLeft } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import 'katex/dist/katex.min.css'
 import SQLDetailsPanel from '@/components/SQLDetailsPanel'
+import MathDisplay from '@/components/MathDisplay'
 // Removed popup interactive components to reduce latency and simplify UX
 // import InlineSQLChart from '@/components/InlineSQLChart'
 // import InteractivePrompts from '@/components/InteractivePrompts'
@@ -71,6 +73,36 @@ interface Suggestion {
   description: string;
   question: string;
   icon: string;
+}
+
+const CHAT_HISTORY_STORAGE_KEY = 'finagent_chat_history'
+const MAX_MESSAGE_LENGTH = 4000
+const STREAM_POLL_INTERVAL = 250
+const SUGGESTION_LIMIT = 6
+const MAX_HISTORY_MESSAGES = 40
+
+const renderMessageSegments = (content: string | undefined) => {
+  if (!content) return null
+
+  const parts = content.split(/(\$\$[\s\S]+?\$\$)/g)
+
+  return parts.map((part, index) => {
+    if (!part) return null
+
+    const isLatexBlock = part.startsWith('$$') && part.endsWith('$$')
+
+    if (isLatexBlock) {
+      const latex = part.slice(2, -2).trim()
+      if (!latex) return null
+      return <MathDisplay key={`latex-${index}`} formula={latex} displayMode />
+    }
+
+    return (
+      <ReactMarkdown key={`md-${index}`} remarkPlugins={[remarkGfm]}>
+        {part}
+      </ReactMarkdown>
+    )
+  })
 }
 
 export default function ChatPage() {
@@ -213,6 +245,9 @@ function ChatPageContent() {
             if (data?.content) {
               setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, content: (m.content || '') + data.content } : m));
             }
+            if (data?.sql_details) {
+              setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m));
+            }
           } catch {}
         }
       }
@@ -226,6 +261,9 @@ function ChatPageContent() {
               const data = JSON.parse(dataStr);
               if (data?.content) {
                 setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, content: (m.content || '') + data.content } : m));
+              }
+              if (data?.sql_details) {
+                setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m));
               }
             } catch {}
           }
@@ -318,7 +356,9 @@ function ChatPageContent() {
               if (data?.content) {
                 setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, content: (m.content || '') + data.content } : m))
               }
-              // Optionally handle sql_details later if we add them to stream
+              if (data?.sql_details) {
+                setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m))
+              }
             } catch (e) {
               // ignore malformed chunks
             }
@@ -334,6 +374,9 @@ function ChatPageContent() {
                 const data = JSON.parse(dataStr)
                 if (data?.content) {
                   setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, content: (m.content || '') + data.content } : m))
+                }
+                if (data?.sql_details) {
+                  setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m))
                 }
               } catch {}
             }
@@ -409,57 +452,55 @@ function ChatPageContent() {
             />
           ) : (
             <div className="space-y-6">
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`flex max-w-3xl ${message.isUser ? 'flex-row-reverse' : 'flex-row'} items-start space-x-3`}>
-                    {/* Avatar */}
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      message.isUser 
-                        ? 'bg-blue-600' 
-                        : 'bg-gradient-to-r from-green-500 to-blue-600'
-                    }`}>
-                      {message.isUser ? (
-                        <User className="h-4 w-4 text-white" />
-                      ) : (
-                        <Bot className="h-4 w-4 text-white" />
-                      )}
-                    </div>
-
-                    {/* Message Content */}
-                    <div className={`flex-1 ${message.isUser ? 'text-right' : 'text-left'}`}>
-                      <div className={`inline-block p-4 rounded-2xl ${
+              {messages.map((message) => {
+                return (
+                  <div key={message.id} className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`flex max-w-3xl ${message.isUser ? 'flex-row-reverse' : 'flex-row'} items-start space-x-3`}>
+                      {/* Avatar */}
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                         message.isUser 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-white border border-gray-200 text-gray-900'
+                          ? 'bg-blue-600' 
+                          : 'bg-gradient-to-r from-green-500 to-blue-600'
                       }`}>
-                        <div className="prose prose-sm max-w-none">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
-                        
-                      {/* Guidance removed to reduce extra UI latency */}
+                        {message.isUser ? (
+                          <User className="h-4 w-4 text-white" />
+                        ) : (
+                          <Bot className="h-4 w-4 text-white" />
+                        )}
                       </div>
 
-                      {/* Interactive components disabled */}
-
-                      {/* SQL Details */}
-                      {message.sqlDetails && (
-                        <div className="mt-3">
-                          <SQLDetailsPanel sqlDetails={message.sqlDetails} />
+                      {/* Message Content */}
+                      <div className={`flex-1 ${message.isUser ? 'text-right' : 'text-left'}`}>
+                        <div className={`inline-block p-4 rounded-2xl ${
+                          message.isUser 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-white border border-gray-200 text-gray-900'
+                        }`}>
+                          <div className="prose prose-sm max-w-none">
+                            {renderMessageSegments(message.content)}
+                          </div>
+                          
+                        {/* Guidance removed to reduce extra UI latency */}
                         </div>
-                      )}
 
-                      {/* Timestamp */}
-                      <div className={`text-xs text-gray-500 mt-1 ${message.isUser ? 'text-right' : 'text-left'}`}>
-                        {formatTimestamp(message.timestamp)}
+                        {/* Interactive components disabled */}
+
+                        {/* SQL Details */}
+                        {message.sqlDetails && (
+                          <div className="mt-3">
+                            <SQLDetailsPanel sqlDetails={message.sqlDetails} />
+                          </div>
+                        )}
+
+                        {/* Timestamp */}
+                        <div className={`text-xs text-gray-500 mt-1 ${message.isUser ? 'text-right' : 'text-left'}`}>
+                          {formatTimestamp(message.timestamp)}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
 
               {/* Loading indicator */}
               {isLoading && (

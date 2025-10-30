@@ -145,7 +145,9 @@ class StudentLoanPaymentCalculator(BaseTool):
                 "scenario_type": scenario_type,
                 "loans": [],
                 "summary": {},
-                "recommendations": []
+                "recommendations": [],
+                "latex_formulas": [],
+                "calculation_steps": []
             }
             
             total_current_payment = 0
@@ -159,7 +161,20 @@ class StudentLoanPaymentCalculator(BaseTool):
                 total_current_payment += loan_result["current_payment"]
                 total_new_payment += loan_result["new_payment"]
                 total_savings += loan_result.get("savings", 0)
-            
+
+                base_formula = loan_result.get("base_formula")
+                if base_formula:
+                    results["latex_formulas"].append(base_formula)
+
+                extra_details = loan_result.get("extra_payment_details")
+                if extra_details and extra_details.get("formula"):
+                    results["latex_formulas"].append(extra_details["formula"])
+
+                if loan_result.get("calculation_steps"):
+                    for step in loan_result["calculation_steps"]:
+                        if step.get("latex") and step.get("display"):
+                            results["latex_formulas"].append(step["latex"])
+
             # Generate summary
             results["summary"] = {
                 "total_loans": len(loans),
@@ -174,7 +189,10 @@ class StudentLoanPaymentCalculator(BaseTool):
             
             # Generate mathematical explanations
             results["mathematical_explanation"] = self._generate_mathematical_explanation(loans, scenario_type, extra_payment, new_rate, new_term)
-            
+
+            if results["loans"]:
+                results["calculation_steps"] = results["loans"][0].get("calculation_steps", [])
+
             return results
             
         except Exception as e:
@@ -212,6 +230,31 @@ class StudentLoanPaymentCalculator(BaseTool):
             # Calculate different scenarios
             scenarios = self._calculate_scenarios(principal, annual_interest_rate, loan_term_years)
             
+            # Generate LaTeX formula for payment calculation
+            monthly_rate = annual_interest_rate / 100 / 12
+            num_payments = loan_term_years * 12
+            payment_formula = self._generate_payment_formula_latex(principal, monthly_rate, num_payments)
+            
+            latex_formulas = [payment_formula]
+            if extra_payment_result and extra_payment_result.get("formula"):
+                latex_formulas.append(extra_payment_result["formula"])
+
+            calculation_steps = self._build_monthly_payment_steps(
+                principal=principal,
+                annual_rate=annual_interest_rate,
+                num_payments=int(loan_term_years * 12),
+                monthly_payment=base_payment
+            )
+
+            if extra_payment > 0 and extra_payment_result:
+                calculation_steps.extend(
+                    self._build_interest_savings_steps(
+                        original_interest=extra_payment_result["original_total_interest"],
+                        new_interest=extra_payment_result["total_interest"],
+                        savings=extra_payment_result["total_savings"]
+                    )
+                )
+
             return {
                 "status": "success",
                 "loan_details": {
@@ -225,11 +268,14 @@ class StudentLoanPaymentCalculator(BaseTool):
                     "total_payments": loan_term_years * 12,
                     "total_interest": (base_payment * loan_term_years * 12) - principal,
                     "total_cost": base_payment * loan_term_years * 12,
-                    "payoff_date": self._calculate_payoff_date(loan_term_years)
+                    "payoff_date": self._calculate_payoff_date(loan_term_years),
+                    "formula": payment_formula
                 },
                 "extra_payment_scenario": extra_payment_result,
                 "scenarios": scenarios,
-                "recommendations": self._generate_hypothetical_recommendations(principal, annual_interest_rate, loan_term_years)
+                "recommendations": self._generate_hypothetical_recommendations(principal, annual_interest_rate, loan_term_years),
+                "latex_formulas": latex_formulas,
+                "calculation_steps": calculation_steps
             }
             
         except Exception as e:
@@ -312,6 +358,7 @@ class StudentLoanPaymentCalculator(BaseTool):
                 result["savings"] = savings_result["total_savings"]
                 result["new_payoff_date"] = savings_result["payoff_date"]
                 result["months_saved"] = savings_result["months_saved"]
+                result["extra_payment_details"] = savings_result
         
         elif scenario_type == "refinance" and new_rate:
             # Refinancing scenario
@@ -353,6 +400,37 @@ class StudentLoanPaymentCalculator(BaseTool):
             result["new_payment"] = current_payment
             result["savings"] = 0
         
+        # Always capture base formula for transparency
+        monthly_rate = current_rate / 100 / 12
+        result["base_formula"] = self._generate_payment_formula_latex(principal, monthly_rate, current_term_months)
+
+        payments_for_steps = (
+            target_payoff_months if scenario_type == "target_payoff" and target_payoff_months
+            else int((new_term if new_term else current_term_months / 12) * 12) if scenario_type == "refinance"
+            else current_term_months
+        )
+
+        rate_for_steps = (
+            (new_rate if (scenario_type == "refinance" and new_rate is not None) else current_rate)
+        )
+
+        result["calculation_steps"] = self._build_monthly_payment_steps(
+            principal=principal,
+            annual_rate=rate_for_steps,
+            num_payments=int(payments_for_steps),
+            monthly_payment=result["new_payment"]
+        )
+
+        if scenario_type in ["current", "extra_payment"] and extra_payment > 0 and result.get("extra_payment_details"):
+            extra_info = result["extra_payment_details"]
+            result["calculation_steps"].extend(
+                self._build_interest_savings_steps(
+                    original_interest=extra_info["original_total_interest"],
+                    new_interest=extra_info["total_interest"],
+                    savings=extra_info["total_savings"]
+                )
+            )
+
         return result
     
     def _calculate_monthly_payment(self, principal: float, annual_rate: float, term_years: int) -> float:
@@ -365,6 +443,73 @@ class StudentLoanPaymentCalculator(BaseTool):
         
         monthly_payment = principal * (monthly_rate * (1 + monthly_rate)**total_payments) / ((1 + monthly_rate)**total_payments - 1)
         return round(monthly_payment, 2)
+    
+    def _generate_payment_formula_latex(self, principal: float, monthly_rate: float, num_payments: int) -> str:
+        """Generate LaTeX formula for monthly payment calculation."""
+        return f"$$P = {principal:.2f} \\times \\frac{{{monthly_rate:.6f}(1 + {monthly_rate:.6f})^{{{num_payments}}}}}{{(1 + {monthly_rate:.6f})^{{{num_payments}}} - 1}}$$"
+    
+    def _generate_interest_savings_latex(self, original_interest: float, new_interest: float) -> str:
+        """Generate LaTeX formula for interest savings."""
+        savings = original_interest - new_interest
+        return f"$$\\text{{Interest Savings}} = \\${original_interest:.2f} - \\${new_interest:.2f} = \\${savings:.2f}$$"
+
+    def _build_monthly_payment_steps(self, principal: float, annual_rate: float, num_payments: int, monthly_payment: float) -> List[Dict[str, Any]]:
+        """Create structured steps describing the monthly payment calculation."""
+        monthly_rate = (annual_rate / 100) / 12 if annual_rate else 0
+        steps: List[Dict[str, Any]] = [
+            {
+                "title": "Monthly payment formula",
+                "description": "M = monthly payment, P = principal, r = monthly interest rate, n = total number of payments.",
+                "latex": "M = P \\times \\frac{r(1+r)^n}{(1+r)^n - 1}",
+                "display": True
+            }
+        ]
+
+        steps.append(
+            {
+                "title": "Plug in your numbers",
+                "description": f"P = ${principal:,.2f}, r = {monthly_rate * 100:.3f}% per month, n = {num_payments} payments.",
+                "latex": self._build_monthly_payment_latex(principal, monthly_rate, num_payments),
+                "display": True
+            }
+        )
+
+        steps.append(
+            {
+                "title": "Calculated monthly payment",
+                "description": f"Your monthly payment comes to approximately ${monthly_payment:,.2f}.",
+                "latex": f"M = {monthly_payment:.2f}",
+                "display": False
+            }
+        )
+
+        return steps
+
+    def _build_interest_savings_steps(self, original_interest: float, new_interest: float, savings: float) -> List[Dict[str, Any]]:
+        """Create structured steps describing interest savings from extra payments."""
+        return [
+            {
+                "title": "Interest savings formula",
+                "description": "Savings = interest without extra payments minus interest with extra payments.",
+                "latex": "\\text{Savings} = I_{\\text{original}} - I_{\\text{new}}",
+                "display": True
+            },
+            {
+                "title": "Plug in your numbers",
+                "description": (
+                    f"I_{{original}} = ${original_interest:,.2f}, I_{{new}} = ${new_interest:,.2f}."
+                ),
+                "latex": (
+                    f"\\text{{Savings}} = \\${original_interest:.2f} - \\${new_interest:.2f} = \\${savings:.2f}"
+                ),
+                "display": True
+            }
+        ]
+
+    def _build_monthly_payment_latex(self, principal: float, monthly_rate: float, num_payments: int) -> str:
+        numerator = f"{monthly_rate:.6f}(1 + {monthly_rate:.6f})^{num_payments}"
+        denominator = f"(1 + {monthly_rate:.6f})^{num_payments} - 1"
+        return f"M = {principal:.2f} \\times \\frac{{{numerator}}}{{{denominator}}}"
     
     def _validate_calculation(self, principal: float, total_interest: float, months: int) -> bool:
         """Validate that calculations are reasonable to prevent errors."""
@@ -421,6 +566,7 @@ class StudentLoanPaymentCalculator(BaseTool):
         
         # Calculate actual interest savings (original interest - new interest)
         interest_savings = original_total_interest - total_interest
+        interest_formula = self._generate_interest_savings_latex(original_total_interest, total_interest)
         
         # Validate calculations to prevent errors
         if not self._validate_calculation(principal, total_interest, months_to_payoff):
@@ -432,7 +578,8 @@ class StudentLoanPaymentCalculator(BaseTool):
             "months_saved": months_saved,
             "total_interest": total_interest,
             "original_total_interest": original_total_interest,
-            "total_savings": interest_savings
+            "total_savings": interest_savings,
+            "formula": interest_formula
         }
     
     def _calculate_required_payment_for_target_payoff(self, principal: float, annual_rate: float, 
@@ -441,6 +588,7 @@ class StudentLoanPaymentCalculator(BaseTool):
         if annual_rate == 0:
             required_payment = principal / target_months
             total_interest = 0
+            monthly_rate = 0
         else:
             monthly_rate = annual_rate / 100 / 12
             # Use loan payment formula: P = [r*PV] / [1-(1+r)^-n]
@@ -451,12 +599,15 @@ class StudentLoanPaymentCalculator(BaseTool):
         if not self._validate_calculation(principal, total_interest, target_months):
             raise ValueError(f"Target payoff calculation validation failed: principal=${principal}, interest=${total_interest}, months={target_months}")
         
+        payment_formula = self._generate_payment_formula_latex(principal, monthly_rate, target_months) if annual_rate != 0 else None
+
         return {
             "required_monthly_payment": required_payment,
             "target_payoff_months": target_months,
             "total_interest": total_interest,
             "payoff_date": self._calculate_payoff_date(target_months / 12),
-            "total_cost": principal + total_interest
+            "total_cost": principal + total_interest,
+            "formula": payment_formula
         }
     
     def _calculate_scenarios(self, principal: float, annual_rate: float, term_years: int) -> Dict[str, Any]:

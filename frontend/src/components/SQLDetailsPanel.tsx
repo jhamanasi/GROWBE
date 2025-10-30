@@ -48,6 +48,8 @@ ChartJS.register(
   BubbleController
 );
 
+const CHARTS_ENABLED = false;
+
 interface SQLDetails {
   query: string;
   result_count: number;
@@ -507,16 +509,18 @@ export default function SQLDetailsPanel({
             >
               Results ({sqlDetails.result_count})
             </button>
-            <button
-              onClick={() => setActiveTab('charts')}
-              className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'charts'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Charts
-            </button>
+            {CHARTS_ENABLED && (
+              <button
+                onClick={() => setActiveTab('charts')}
+                className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'charts'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Charts
+              </button>
+            )}
           </div>
 
           {/* Query Tab */}
@@ -621,7 +625,7 @@ export default function SQLDetailsPanel({
           )}
 
           {/* Charts Tab */}
-          {activeTab === 'charts' && (
+          {CHARTS_ENABLED && activeTab === 'charts' && (
             <div className="space-y-4">
               {/* Chart Type Selection */}
               <div className="space-y-3">

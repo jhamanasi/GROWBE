@@ -15,6 +15,7 @@ from services.customer_service import customer_service
 from hooks.financial_conversation_hook import FinancialConversationHook
 from hooks.sql_capture_hook import SQLResultCaptureHook
 from hooks.conversation_capture_hook import ConversationCaptureHook
+from tools.nl2sql_tool import get_last_sql_details
 
 # Tool imports
 from tools.customer_profile_tool import CustomerProfileTool
@@ -421,15 +422,16 @@ async def chat(request: ChatRequest):
         
         # Prepare the message with explicit customer_id token so tools see CXXX
         message_with_context = request.message
+        scenario_line = "Scenario: Existing user with full profile." if request.user_type == "existing" else "Scenario: New user with no stored profile — collect missing data before tool calls."
         if request.user_type == "existing" and request.session_id:
             token_line = f"Explicit Customer ID Token: {request.session_id}"
         else:
             token_line = None
         if customer_context:
             ctx = f"Customer Context:\n{customer_context}"
-            message_with_context = "\n\n".join(filter(None, [ctx, token_line, f"User Message: {request.message}"]))
+            message_with_context = "\n\n".join(filter(None, [scenario_line, ctx, token_line, f"User Message: {request.message}"]))
         else:
-            message_with_context = "\n\n".join(filter(None, [token_line, f"User Message: {request.message}"])) or request.message
+            message_with_context = "\n\n".join(filter(None, [scenario_line, token_line, f"User Message: {request.message}"])) or request.message
         
         # Get response from financial agent
         print("🤖 Getting response from financial agent...")
@@ -454,7 +456,7 @@ async def chat(request: ChatRequest):
                 agent_result = financial_agent(message_with_context)
         else:
             agent_result = financial_agent(message_with_context)
-        
+ 
         # Extract the response text from the agent result
         if hasattr(agent_result, 'content'):
             response = agent_result.content
@@ -493,8 +495,9 @@ async def chat(request: ChatRequest):
             print(f"💡 Added guidance: {component_analysis.guidance[:50]}...")
         
         # Add SQL details if available
-        if hasattr(sql_capture_hook, 'last_result') and sql_capture_hook.last_result:
-            chat_response.sql_details = sql_capture_hook.last_result
+        sql_details = get_last_sql_details()
+        if sql_details:
+            chat_response.sql_details = sql_details
             print("📊 Added SQL details to response")
         
         print("✅ Chat response prepared successfully")
@@ -578,6 +581,12 @@ async def chat_stream(request: ChatRequest):
                 # Final/stop signals: do NOT break; let stream_async finish its own span cleanly
                 if isinstance(event, dict) and (event.get('messageStop') or event.get('result')):
                     continue
+
+            # After streaming completes, send SQL details if available
+            sql_details = get_last_sql_details()
+            if sql_details:
+                yield f"data: {json.dumps({'sql_details': sql_details})}\n\n"
+                await asyncio.sleep(0)
 
             yield "data: [DONE]\n\n"
         except (asyncio.CancelledError, GeneratorExit):

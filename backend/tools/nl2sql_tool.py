@@ -7,7 +7,7 @@ handling all financial use cases including customer profiles, loans, accounts, t
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from .base_tool import BaseTool
 from .sqlite_tool import SQLiteTool
 from pathlib import Path
@@ -68,10 +68,18 @@ FINANCIAL_SQL_SYSTEM_PROMPT = (
     "   - Customer profile: SELECT * FROM customers WHERE customer_id = 'C001' "
     "   - All customer loans: SELECT * FROM debts_loans WHERE customer_id = 'C001' "
     "   - Student loans only: SELECT * FROM debts_loans WHERE customer_id = 'C001' AND type = 'student' "
+    "   - Loan tenure/term: SELECT term_months, origination_date, original_principal FROM debts_loans WHERE customer_id = 'C001' AND type = 'student' "
+    "   - Original loan amount: SELECT original_principal, origination_date FROM debts_loans WHERE customer_id = 'C001' "
     "   - Account balances: SELECT SUM(current_balance) FROM accounts WHERE customer_id = 'C001' "
     "   - Recent transactions: SELECT * FROM transactions t JOIN accounts a ON t.account_id = a.account_id WHERE a.customer_id = 'C001' ORDER BY posted_date DESC LIMIT 10 "
     "   - Credit score history: SELECT * FROM credit_reports WHERE customer_id = 'C001' ORDER BY as_of_month DESC "
     "   - Debt summary: SELECT type, SUM(current_principal), AVG(interest_rate_apr) FROM debts_loans WHERE customer_id = 'C001' GROUP BY type "
+    
+    "   IMPORTANT SYNONYMS: "
+    "   - 'tenure', 'term', 'term months', 'loan term', 'repayment period', 'original tenure' → term_months column "
+    "   - 'original amount', 'original loan', 'how much did I borrow' → original_principal column "
+    "   - 'current balance', 'how much do I owe', 'remaining balance' → current_principal column "
+    "   - 'monthly payment', 'minimum payment', 'required payment' → min_payment_mo column "
     
     "8. AGGREGATION PATTERNS: "
     "   - Customer totals: GROUP BY customer_id "
@@ -381,6 +389,17 @@ def _generate_fallback_sql(question: str) -> str:
     else:
         return "SELECT * FROM customers LIMIT 5;"
 
+LAST_SQL_DETAILS: Dict[str, Any] = {}
+
+
+def get_last_sql_details(clear: bool = True) -> Optional[Dict[str, Any]]:
+    global LAST_SQL_DETAILS
+    details = LAST_SQL_DETAILS.copy() if LAST_SQL_DETAILS else None
+    if clear:
+        LAST_SQL_DETAILS = {}
+    return details
+
+
 class NL2SQLTool(BaseTool):
     """Convert natural language questions to SQLite SQL for financial database queries."""
     
@@ -454,10 +473,21 @@ class NL2SQLTool(BaseTool):
             
             # Generate formatted response based on query type and results
             formatted_response = self._generate_formatted_response(question, result, sql)
-            
-            # Return the formatted response as the primary result for the agent
-            # The agent will see this as the main tool result
-            return formatted_response
+
+            # Build structured SQL details for UI consumption
+            sql_details = self._build_sql_details(sql, result)
+
+            # Store globally so the API can attach it to responses
+            global LAST_SQL_DETAILS
+            LAST_SQL_DETAILS = sql_details
+
+            # Return both the formatted response for the agent AND structured data
+            return {
+                "formatted_response": formatted_response,
+                "sql": sql,
+                "result": result,
+                "sql_details": sql_details
+            }
             
         except Exception as e:
             return f"I encountered an error while accessing your financial data: {str(e)}. Please try rephrasing your question or contact support if the issue persists."
@@ -610,6 +640,35 @@ class NL2SQLTool(BaseTool):
             return "I don't see any records matching your request in your financial profile."
         
         return f"I found {len(rows)} record(s) in your financial profile. Would you like me to provide more specific details about any particular aspect?"
+
+    def _build_sql_details(self, sql: str, result: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            rows = result.get('rows', []) if isinstance(result, dict) else []
+            columns = result.get('columns', []) if isinstance(result, dict) else []
+            if not columns and rows and isinstance(rows[0], dict):
+                columns = list(rows[0].keys())
+            result_count = len(rows)
+
+            return {
+                "query": sql.strip() if isinstance(sql, str) else "",
+                "result_count": result_count,
+                "columns": columns,
+                "rows": rows[:100] if rows else [],
+                "total_rows": result_count,
+                "execution_time": result.get('execution_time') if isinstance(result, dict) else None,
+                "truncated": result_count > 100
+            }
+        except Exception as build_exc:
+            print(f"Failed to build SQL details: {build_exc}")
+            return {
+                "query": sql.strip() if isinstance(sql, str) else "",
+                "result_count": 0,
+                "columns": [],
+                "rows": [],
+                "total_rows": 0,
+                "execution_time": None,
+                "truncated": False
+            }
 
     def _validate_sql(self, sql: str) -> bool:
         """Validate SQL query for safety."""

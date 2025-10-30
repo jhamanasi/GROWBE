@@ -40,73 +40,7 @@ class SQLResultCaptureHook(HookProvider):
         Args:
             event: The AfterInvocationEvent containing tool execution details
         """
-        try:
-            # Check if the event has the expected attributes
-            if not hasattr(event, 'tool_name') or not hasattr(event, 'result'):
-                return
-                
-            # Only process nl2sql_query tool calls
-            if event.tool_name != "nl2sql_query":
-                return
-                
-            logger.info(f"Capturing SQL results for tool: {event.tool_name}")
-            
-            # Extract tool result
-            tool_result = event.result
-            if not tool_result:
-                logger.warning("No result found in event")
-                return
-                
-            # Parse the tool result content
-            content = tool_result["content"]
-            if not content or not isinstance(content, list) or len(content) == 0:
-                logger.warning("Invalid content structure in tool result")
-                return
-                
-            # Get the text content (should contain JSON with sql and result)
-            text_content = content[0].get("text", "")
-            if not text_content:
-                logger.warning("No text content found in tool result")
-                return
-                
-            # Parse the response from nl2sql_tool (might be dict literal with single quotes)
-            try:
-                # Try JSON first, then fall back to ast.literal_eval for Python dict literals
-                try:
-                    nl2sql_response = json.loads(text_content)
-                except json.JSONDecodeError:
-                    # Handle Python dict literals with single quotes
-                    nl2sql_response = ast.literal_eval(text_content)
-            except (json.JSONDecodeError, ValueError, SyntaxError) as e:
-                logger.warning(f"Failed to parse nl2sql tool response: {text_content}")
-                return
-                
-            # Extract SQL and result details
-            sql_query = nl2sql_response.get("sql", "")
-            query_result = nl2sql_response.get("result", {})
-            
-            if not sql_query:
-                logger.warning("No SQL query found in nl2sql response")
-                return
-                
-            # Process the query result
-            sql_details = self._process_query_result(sql_query, query_result)
-            
-            # Add intelligent chart analysis
-            chart_config = self._analyze_chart_eligibility(sql_query, sql_details, self.user_question)
-            if chart_config:
-                sql_details["chart_config"] = chart_config
-            
-            # Store the captured details
-            self.captured_sql_details = sql_details
-            
-            # Modify the tool result to include SQL details in a structured way
-            self._enhance_tool_result(event, sql_details)
-            
-            logger.info(f"Successfully captured SQL details: {sql_details['result_count']} rows")
-            
-        except Exception as e:
-            logger.error(f"Error capturing SQL results: {e}")
+        return
     
     def _process_query_result(self, sql_query: str, query_result: Dict[str, Any]) -> Dict[str, Any]:
         """
