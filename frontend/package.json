@@ -22,6 +22,7 @@
     "framer-motion": "^12.23.22",
     "katex": "^0.16.25",
     "lucide-react": "^0.544.0",
+    "motion": "^12.23.24",
     "next": "15.5.3",
     "react": "19.1.0",
     "react-chartjs-2": "^5.2.0",
