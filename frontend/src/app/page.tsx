@@ -24,37 +24,83 @@ export default function Home() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
 
+  // Helper to detect if input is a UUID (session_id) vs customer_id (C001 format)
+  const isUUID = (str: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
   const handleExistingUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!customerId.trim()) {
-      setError('Please enter your customer ID');
+      setError('Please enter your customer ID or session ID');
       return;
     }
 
     setIsLoading(true);
     setError('');
 
+    const input = customerId.trim();
+    const isSessionId = isUUID(input);
+
     try {
-      // Check if customer exists by trying to get their context
-      const response = await fetch(`http://localhost:8000/customer/${customerId.trim()}/context`);
-      
+      if (isSessionId) {
+        const convsResp = await fetch(`http://localhost:8000/api/conversations?session_id=${input}`);
+        if (convsResp.ok) {
+              const params = new URLSearchParams();
+              params.set('sessionId', input);
+              router.push(`/conversations?${params.toString()}`);
+        } else {
+          setError('Session ID not found. Please check your ID or create a new profile.');
+        }
+      } else {
+        const response = await fetch(`http://localhost:8000/customer/${input}/context`);
       if (response.ok) {
-        // Customer exists, redirect to chat
-        router.push(`/chat?customerId=${customerId.trim()}&userType=existing`);
+              const params = new URLSearchParams();
+              params.set('customerId', input);
+              router.push(`/conversations?${params.toString()}`);
       } else {
         setError('Customer ID not found. Please check your ID or create a new profile.');
+        }
       }
     } catch (error) {
-      console.error('Error checking customer:', error);
-      setError('Unable to verify customer ID. Please try again.');
+      console.error('Error checking customer/session:', error);
+      setError('Unable to verify ID. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleNewUser = () => {
-    router.push('/financial-assessment');
+  const handleNewUser = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const resp = await fetch('http://localhost:8000/api/conversations/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scenario_type: 'new',
+          initial_message: firstName
+            ? `Hi ${firstName}, welcome to Growbe! Let’s get started with your goals.`
+            : `Hello! Let’s get started with your goals.`,
+        }),
+      });
+      if (!resp.ok) {
+        throw new Error(`Failed to start conversation (${resp.status})`);
+      }
+      const data = await resp.json();
+      const sessionId = data.session_id;
+      // For new users, always redirect to the greeting page. The session_id is still passed.
+      const params = new URLSearchParams();
+      if (sessionId) params.set('sessionId', sessionId);
+      router.push(`/conversations?${params.toString()}`);
+    } catch (e: any) {
+      console.error('Failed to start new user conversation:', e);
+      setError('Something went wrong starting your chat. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -125,7 +171,7 @@ export default function Home() {
                   <form onSubmit={handleExistingUser} className="space-y-4">
                     <div>
                       <label htmlFor="customerId" className="block text-base font-medium text-white mb-2">
-                        Unique ID
+                        Customer ID or Session ID
                       </label>
                       <Input
                         id="customerId"
@@ -135,7 +181,7 @@ export default function Home() {
                           setCustomerId(e.target.value);
                           setError('');
                         }}
-                        placeholder="Enter your Unique ID"
+                        placeholder="Enter your Customer ID (e.g., C001) or Session ID"
                         className={`px-4 py-2 text-black backdrop-blur-sm border border-black rounded-md bg-white text-sm transition duration-200 ${error ? 'border-red-500' : ''}`}
                         disabled={isLoading}
                       />

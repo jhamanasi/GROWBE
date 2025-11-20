@@ -1,0 +1,100 @@
+{"question_id": 1, "expected_answer": "Debt snowball pays off smallest debts first for motivation, while debt avalanche pays highest interest debts first to save money."}
+{"question_id": 2, "expected_answer": "Debt avalanche saves more money over time by eliminating highest interest debt first."}
+{"question_id": 3, "expected_answer": "Only paying minimums leads to accumulating interest, longer payoff time, and higher total cost."}
+{"question_id": 4, "expected_answer": "Minimum payments are typically calculated as a percentage of balance plus interest, usually 2-3% of balance."}
+{"question_id": 5, "expected_answer": "Debt snowball works better for psychological motivation and momentum when debts are similar in interest rates."}
+{"question_id": 6, "expected_answer": "Revolving debt has flexible payments and no fixed term, installment debt has fixed payments and term."}
+{"question_id": 7, "expected_answer": "High-interest debt costs more over time due to compound interest, so paying it first saves money."}
+{"question_id": 8, "expected_answer": "Balance transfer moves debt to lower interest card, helping repay faster and save on interest."}
+{"question_id": 9, "expected_answer": "Balance transfers risk higher fees, rate increases after promotional period, and credit score impact."}
+{"question_id": 10, "expected_answer": "Debt consolidation combines multiple debts into single loan with potentially lower interest or payments."}
+{"question_id": 11, "expected_answer": "Avoid consolidation if rates are higher, you have poor credit, or you continue spending habits."}
+{"question_id": 12, "expected_answer": "Good credit utilization is below 30% of available credit limits."}
+{"question_id": 13, "expected_answer": "Late payments lower credit score by 30-100 points and stay on report for 7 years."}
+{"question_id": 14, "expected_answer": "Daily simple interest is calculated by multiplying balance by rate divided by 365."}
+{"question_id": 15, "expected_answer": "Extra principal payments reduce balance faster, decreasing future interest calculations."}
+{"question_id": 16, "expected_answer": "Amortization formula calculates equal payments covering principal and interest over loan term."}
+{"question_id": 17, "expected_answer": "APR includes interest rate plus fees, giving true cost of borrowing."}
+{"question_id": 18, "expected_answer": "PMI protects lender against default, required when down payment is less than 20%."}
+{"question_id": 19, "expected_answer": "Early payments are mostly interest because principal balance is highest at loan start."}
+{"question_id": 20, "expected_answer": "Fixed-rate mortgages have consistent payments, adjustable rates can change with market."}
+{"question_id": 21, "expected_answer": "DTI is calculated by dividing total monthly debt payments by gross monthly income."}
+{"question_id": 22, "expected_answer": "Good DTI ratio is below 36% for most lenders, lower is better."}
+{"question_id": 23, "expected_answer": "Front-end DTI includes housing costs, back-end includes all debt payments."}
+{"question_id": 24, "expected_answer": "High DTI reduces loan approval chances and may result in higher interest rates."}
+{"question_id": 25, "expected_answer": "FICO scores range from 300 to 850, higher scores get better loan terms."}
+{"question_id": 26, "expected_answer": "Payment history is 35% of credit score, most important factor."}
+{"question_id": 27, "expected_answer": "Credit scores increase 1-3 points per month with consistent on-time payments."}
+{"question_id": 28, "expected_answer": "Credit utilization over 30% hurts score, under 10% is ideal."}
+{"question_id": 29, "expected_answer": "Hard inquiries lower score by few points, stay for 2 years on report."}
+{"question_id": 30, "expected_answer": "401(k) contributions are pre-tax, reducing current taxable income."}
+{"question_id": 31, "expected_answer": "Employer match is free money, maximize to get full employer contribution."}
+{"question_id": 32, "expected_answer": "Roth IRA contributions are after-tax, withdrawals are tax-free in retirement."}
+{"question_id": 33, "expected_answer": "Traditional IRA contributions may be tax-deductible, withdrawals taxed as income."}
+{"question_id": 34, "expected_answer": "Emergency fund should cover 3-6 months of essential expenses."}
+{"question_id": 35, "expected_answer": "High-yield savings earn 4-5% interest, much higher than traditional savings."}
+{"question_id": 36, "expected_answer": "CDs offer higher interest than savings but require locking money for set period."}
+{"question_id": 37, "expected_answer": "Index funds track market indices, providing diversification at low cost."}
+{"question_id": 38, "expected_answer": "Dollar-cost averaging reduces market timing risk by investing fixed amounts regularly."}
+{"question_id": 39, "expected_answer": "Asset allocation spreads investments across stocks, bonds, and cash."}
+{"question_id": 40, "expected_answer": "Rebalancing restores target allocations, selling winners and buying losers."}
+{"question_id": 41, "expected_answer": "529 plans offer tax-free growth for education expenses."}
+{"question_id": 42, "expected_answer": "Coverdell ESA has lower contribution limits but similar tax benefits to 529."}
+{"question_id": 43, "expected_answer": "Health Savings Accounts offer triple tax advantage: deductible, tax-free growth, tax-free withdrawals."}
+{"question_id": 44, "expected_answer": "Life insurance provides financial protection for dependents after death."}
+{"question_id": 45, "expected_answer": "Term life is cheaper pure protection, whole life builds cash value but costs more."}
+{"question_id": 46, "expected_answer": "Disability insurance replaces income if unable to work due to illness or injury."}
+{"question_id": 47, "expected_answer": "Umbrella policy provides additional liability coverage beyond auto/home policies."}
+{"question_id": 48, "expected_answer": "Homeowners insurance covers dwelling, personal property, and liability."}
+{"question_id": 49, "expected_answer": "Auto insurance covers bodily injury, property damage, and comprehensive/collision."}
+{"question_id": 50, "expected_answer": "Dwelling coverage protects home structure, personal property covers contents."}
+{"question_id": 51, "expected_answer": "Actual cash value minus depreciation, replacement cost covers rebuilding at current prices."}
+{"question_id": 52, "expected_answer": "Deductible is amount you pay before insurance covers claim."}
+{"question_id": 53, "expected_answer": "Bundling policies saves money through multi-policy discounts."}
+{"question_id": 54, "expected_answer": "Annual review ensures coverage matches current needs and property values."}
+{"question_id": 55, "expected_answer": "Student loans offer lower interest rates than private loans and flexible repayment."}
+{"question_id": 56, "expected_answer": "Federal loans have fixed rates and benefits, private loans vary by lender."}
+{"question_id": 57, "expected_answer": "Income-driven repayment caps payments at percentage of discretionary income."}
+{"question_id": 58, "expected_answer": "Forbearance temporarily pauses payments, interest may still accrue."}
+{"question_id": 59, "expected_answer": "Deferment pauses payments and interest accrual for certain situations."}
+{"question_id": 60, "expected_answer": "Student loan forgiveness available for public service, teachers, nurses after 10 years."}
+{"question_id": 61, "expected_answer": "401(k) loan allows borrowing up to 50% or $50,000 from retirement savings."}
+{"question_id": 62, "expected_answer": "401(k) loans have 5-year repayment, interest paid back to your account."}
+{"question_id": 63, "expected_answer": "401(k) hardship withdrawal incurs taxes and penalties, should be last resort."}
+{"question_id": 64, "expected_answer": "Required Minimum Distribution starts at age 73, must withdraw annually."}
+{"question_id": 65, "expected_answer": "Roth conversion moves money from traditional to Roth IRA, paying taxes now for tax-free withdrawals later."}
+{"question_id": 66, "expected_answer": "Backdoor Roth IRA allows high earners to contribute through conversion."}
+{"question_id": 67, "expected_answer": "SEP IRA for self-employed, higher contribution limits than traditional IRA."}
+{"question_id": 68, "expected_answer": "SIMPLE IRA easier setup than 401(k), lower contribution limits."}
+{"question_id": 69, "expected_answer": "529 plan contributions grow tax-free, withdrawals tax-free for qualified education."}
+{"question_id": 70, "expected_answer": "Coverdell ESA $2,000 annual limit, can be used for K-12 education expenses."}
+{"question_id": 71, "expected_answer": "ABLE account for disabled individuals, similar to 529 but for disability expenses."}
+{"question_id": 72, "expected_answer": "Estate planning protects assets and ensures wishes are followed after death."}
+{"question_id": 73, "expected_answer": "Will directs asset distribution, trust avoids probate and provides control."}
+{"question_id": 74, "expected_answer": "Power of attorney grants someone authority to make financial or medical decisions."}
+{"question_id": 75, "expected_answer": "Healthcare directive specifies medical treatment preferences if incapacitated."}
+{"question_id": 76, "expected_answer": "Estate tax applies to estates over exemption amount, currently $13.61 million."}
+{"question_id": 77, "expected_answer": "Probate is court process validating will and distributing assets."}
+{"question_id": 78, "expected_answer": "Living trust avoids probate, provides privacy and faster asset transfer."}
+{"question_id": 79, "expected_answer": "Guardian appointed by court to manage affairs of incapacitated person."}
+{"question_id": 80, "expected_answer": "Tax basis determines capital gains tax when assets are sold."}
+{"question_id": 81, "expected_answer": "Step-up in basis resets asset value to fair market value at death."}
+{"question_id": 82, "expected_answer": "Annual gift tax exclusion allows $18,000 gifts per person tax-free."}
+{"question_id": 83, "expected_answer": "Lifetime exemption protects large gifts from estate tax."}
+{"question_id": 84, "expected_answer": "Charitable remainder trust provides income then donates remainder."}
+{"question_id": 85, "expected_answer": "Generation-skipping trust transfers wealth multiple generations tax-free."}
+{"question_id": 86, "expected_answer": "Medicaid look-back period is 5 years for asset transfers."}
+{"question_id": 87, "expected_answer": "Long-term care insurance covers nursing home and home care costs."}
+{"question_id": 88, "expected_answer": "Hybrid LTC policies combine life insurance with long-term care benefits."}
+{"question_id": 89, "expected_answer": "Reverse mortgage allows borrowing against home equity without monthly payments."}
+{"question_id": 90, "expected_answer": "Reverse mortgage reduces home equity, borrower must maintain home and pay taxes."}
+{"question_id": 91, "expected_answer": "Annuities provide guaranteed income stream in retirement."}
+{"question_id": 92, "expected_answer": "Fixed annuities guarantee payment amount, variable annuities fluctuate with investments."}
+{"question_id": 93, "expected_answer": "Immediate annuities start payments immediately, deferred annuities grow then pay."}
+{"question_id": 94, "expected_answer": "Qualified longevity annuity contract defers payments to later age for higher amounts."}
+{"question_id": 95, "expected_answer": "Social Security benefits based on lifetime earnings, higher earnings mean higher benefits."}
+{"question_id": 96, "expected_answer": "Full retirement age is between 66-67 depending on birth year."}
+{"question_id": 97, "expected_answer": "Early retirement reduces benefits 5-6% per month before full retirement age."}
+{"question_id": 98, "expected_answer": "Delayed retirement increases benefits 8% per year after full retirement age."}
+{"question_id": 99, "expected_answer": "Social Security tax rate is 6.2% each for employee and employer, total 12.4%."}
+{"question_id": 100, "expected_answer": "Social Security wage base limit is $168,600 in 2024, no tax on earnings above this."}

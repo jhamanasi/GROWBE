@@ -8,6 +8,7 @@ handling all financial use cases including customer profiles, loans, accounts, t
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
+import threading
 from .base_tool import BaseTool
 from .sqlite_tool import SQLiteTool
 from pathlib import Path
@@ -25,7 +26,11 @@ FINANCIAL_SQL_SYSTEM_PROMPT = (
     "   - customers: Core customer profiles with persona_type, base_salary_annual, fico_baseline "
     "   - debts_loans: All loans and debts (student, auto, credit_card, personal) "
     "   - accounts: Financial accounts (checking, savings, credit) with balances and institutions "
-    "   - transactions: Individual transactions with amounts, merchants, categories "
+    "   - transactions: Individual transactions (txn_id, account_id, posted_date, amount, merchant, category_lvl1, category_lvl2) "
+    "     * category_lvl1 = broad category (e.g., 'Housing', 'Food', 'Transport', 'Income') "
+    "     * category_lvl2 = specific category (e.g., 'Rent', 'Groceries', 'Gas', 'Salary') "
+    "     * For rent: category_lvl1 = 'Housing' AND category_lvl2 = 'Rent' "
+    "     * For income: category_lvl1 = 'Income' "
     "   - credit_reports: Monthly credit score snapshots with utilization and history "
     "   - employment_income: Employment details and income information "
     "   - assets: Customer assets (cash, investments, property) with liquidity tiers "
@@ -72,6 +77,9 @@ FINANCIAL_SQL_SYSTEM_PROMPT = (
     "   - Original loan amount: SELECT original_principal, origination_date FROM debts_loans WHERE customer_id = 'C001' "
     "   - Account balances: SELECT SUM(current_balance) FROM accounts WHERE customer_id = 'C001' "
     "   - Recent transactions: SELECT * FROM transactions t JOIN accounts a ON t.account_id = a.account_id WHERE a.customer_id = 'C001' ORDER BY posted_date DESC LIMIT 10 "
+    "   - Rent transactions: SELECT posted_date, amount, merchant FROM transactions t JOIN accounts a ON t.account_id = a.account_id WHERE a.customer_id = 'C001' AND category_lvl2 = 'Rent' ORDER BY posted_date DESC "
+    "   - Monthly rent amount: SELECT AVG(amount) as avg_rent FROM transactions t JOIN accounts a ON t.account_id = a.account_id WHERE a.customer_id = 'C001' AND category_lvl2 = 'Rent' "
+    "   - Spending by category: SELECT category_lvl1, SUM(amount) as total FROM transactions t JOIN accounts a ON t.account_id = a.account_id WHERE a.customer_id = 'C001' GROUP BY category_lvl1 "
     "   - Credit score history: SELECT * FROM credit_reports WHERE customer_id = 'C001' ORDER BY as_of_month DESC "
     "   - Debt summary: SELECT type, SUM(current_principal), AVG(interest_rate_apr) FROM debts_loans WHERE customer_id = 'C001' GROUP BY type "
     
@@ -237,66 +245,69 @@ CREATE TABLE credit_reports (
 """
 
 def _generate_financial_sql(question: str, schema: str) -> str:
-    """Generate SQL for financial database queries."""
-    try:
-        from strands import Agent
-        from strands.models.openai import OpenAIModel
-        import os
-        
-        # Create OpenAI model for SQL generation
-        openai_model = OpenAIModel(
-            client_args={
-                "api_key": os.getenv("OPENAI_API_KEY"),
-            },
-            model_id="gpt-4o",  # Using gpt-4o for best SQL generation
-            params={
-                "max_tokens": 1500,  # Increased for complex SQL queries
-                "temperature": 0.05,  # Very low temperature for maximum consistency
-            }
-        )
-        
-        # Create SQL generation agent
-        sql_agent = Agent(
-            model=openai_model,
-            system_prompt=FINANCIAL_SQL_SYSTEM_PROMPT
-        )
-        
-        # Prepare user prompt with enhanced context
-        user_prompt = (
-            f"FINANCIAL DATABASE SCHEMA:\n{schema}\n\n"
-            f"USER QUESTION: {question}\n\n"
-            "Generate a COMPLETE SQLite SQL query that provides comprehensive information to answer this question. "
-            "For financial questions, include ALL relevant details (amounts, rates, terms, dates, etc.). "
-            "Use SELECT * or SELECT with multiple fields to provide complete, actionable information. "
-            "The user needs complete financial details, not just basic information. "
-            "Do not include explanations, markdown, or code blocks. "
-            "Return only the clean SQL statement."
-        )
-        
-        # Generate SQL
-        result = sql_agent(user_prompt)
-        content = getattr(result, "content", str(result)).strip()
-        
-        # Clean up the response
-        if content.startswith("```"):
-            lines = content.split("\n")
-            if lines and lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].startswith("```"):
-                lines = lines[:-1]
-            content = "\n".join(lines).strip()
-            
-        # Remove any leading/trailing whitespace and ensure it ends properly
-        content = content.strip()
-        if not content.endswith(';'):
-            content += ';'
-            
-        return content
+    """Generate SQL for financial database queries with retry logic."""
+    from strands import Agent
+    from strands.models.openai import OpenAIModel
+    import os
+    import time
 
-    except Exception as e:
-        print(f"Error generating SQL: {e}")
-        # Re-raise the exception so the class method can handle the fallback
-        raise e
+    max_retries = 3
+    retry_delay = 1  # seconds
+
+    for attempt in range(max_retries):
+        try:
+            # Create OpenAI model for SQL generation (new instance each retry to avoid connection issues)
+            openai_model = OpenAIModel(
+                client_args={
+                    "api_key": os.getenv("OPENAI_API_KEY"),
+                    "timeout": 30.0,
+                },
+                model_id="gpt-4o",
+                params={
+                    "max_tokens": 1500,
+                    "temperature": 0.05,
+                },
+            )
+
+            # Create SQL generation agent
+            sql_agent = Agent(
+                model=openai_model,
+                system_prompt=FINANCIAL_SQL_SYSTEM_PROMPT,
+            )
+
+            # Prepare user prompt with enhanced context
+            user_prompt = (
+                f"FINANCIAL DATABASE SCHEMA:\n{schema}\n\n"
+                f"USER QUESTION: {question}\n\n"
+                "Generate a COMPLETE SQLite SQL query that provides comprehensive information to answer this question. "
+                "For financial questions, include ALL relevant details (amounts, rates, terms, dates, etc.). "
+                "Use SELECT * or SELECT with multiple fields to provide complete, actionable information. "
+                "Do not include explanations, markdown, or code blocks. Return only the clean SQL statement."
+            )
+
+            # Generate SQL
+            result = sql_agent(user_prompt)
+            content = getattr(result, "content", str(result)).strip()
+
+            # Clean up the response
+            if content.startswith("```"):
+                lines = content.split("\n")
+                if lines and lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                content = "\n".join(lines).strip()
+
+            # Further strip leading/trailing backticks or whitespace
+            content = content.strip().strip('`').strip()
+
+            return content
+        except Exception as e:
+            # Simple retry logic with backoff
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay * (attempt + 1))
+                continue
+            raise
 
 def _generate_fallback_sql(question: str) -> str:
     """Generate fallback SQL based on keywords with improved logic."""
@@ -390,14 +401,24 @@ def _generate_fallback_sql(question: str) -> str:
         return "SELECT * FROM customers LIMIT 5;"
 
 LAST_SQL_DETAILS: Dict[str, Any] = {}
+_SQL_DETAILS_LOCK = threading.Lock()
 
 
 def get_last_sql_details(clear: bool = True) -> Optional[Dict[str, Any]]:
+    """Thread-safe read of the last captured SQL details."""
     global LAST_SQL_DETAILS
-    details = LAST_SQL_DETAILS.copy() if LAST_SQL_DETAILS else None
-    if clear:
+    with _SQL_DETAILS_LOCK:
+        details = LAST_SQL_DETAILS.copy() if LAST_SQL_DETAILS else None
+        if clear:
+            LAST_SQL_DETAILS = {}
+        return details
+
+
+def clear_sql_details():
+    """Thread-safe clear of captured SQL details."""
+    global LAST_SQL_DETAILS
+    with _SQL_DETAILS_LOCK:
         LAST_SQL_DETAILS = {}
-    return details
 
 
 class NL2SQLTool(BaseTool):
@@ -478,8 +499,9 @@ class NL2SQLTool(BaseTool):
             sql_details = self._build_sql_details(sql, result)
 
             # Store globally so the API can attach it to responses
-            global LAST_SQL_DETAILS
-            LAST_SQL_DETAILS = sql_details
+            global LAST_SQL_DETAILS, _SQL_DETAILS_LOCK
+            with _SQL_DETAILS_LOCK:
+                LAST_SQL_DETAILS = sql_details
 
             # Return both the formatted response for the agent AND structured data
             return {

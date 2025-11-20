@@ -43,8 +43,14 @@ MANIFEST
 *.db.backup*
 backend/data/*.db
 backend/data/*.sqlite
+backend/data/*.backup*
 backend/*.db
 backend/shop.db
+
+# LanceDB vector database files
+*.lance/
+_transactions/
+_versions/
 
 # ==========================================
 # VIRTUAL ENVIRONMENTS
@@ -110,6 +116,10 @@ logs/
 *.temp
 .cache/
 
+# Application-specific logs
+backend.log
+backend/backend.log
+
 # ==========================================
 # TESTING & COVERAGE
 # ==========================================
@@ -120,6 +130,14 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+
+# Evaluation results
+backend/eval/*/results/
+backend/eval/*/results/*.jsonl
+backend/eval/*/results/*.csv
+backend/eval/*/results/*.json
+eval_results_*.jsonl
+calc_results_*.jsonl
 
 # ==========================================
 # DEVELOPMENT TOOLS & FRAMEWORKS
@@ -150,6 +168,20 @@ dmypy.json
 .ropeproject
 
 # ==========================================
+# BACKUP & TEMPORARY FILES
+# ==========================================
+*.backup
+*.backup*
+*~
+*.tmp
+*.temp
+.cache/
+
+# Development backup files
+backend/tools/*.backup
+backend/tools/*.backup*
+
+# ==========================================
 # ADDITIONAL SECURITY FILES
 # ==========================================
 *.key
@@ -159,3 +191,11 @@ dmypy.json
 secrets.json
 credentials.json
 config.local.*
+
+# ==========================================
+# PROJECT-SPECIFIC IGNORES
+# ==========================================
+# Unused evaluation files (duplicate in eval directory)
+growbe_evaluation_question_bank.jsonl
+
+

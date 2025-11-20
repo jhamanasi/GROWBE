@@ -62,37 +62,37 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: oklch(100% 0 0); /* Pure white background */
+  --foreground: oklch(15% 0 0); /* Darker grey for text */
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(15% 0 0);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(15% 0 0);
+  --primary: oklch(25% 0 0); /* Dark grey for primary actions */
+  --primary-foreground: oklch(100% 0 0); /* White text on primary */
+  --secondary: oklch(95% 0 0); /* Light grey for secondary elements */
+  --secondary-foreground: oklch(25% 0 0); /* Dark grey text on secondary */
+  --muted: oklch(95% 0 0);
+  --muted-foreground: oklch(50% 0 0); /* Medium grey for muted text */
+  --accent: oklch(95% 0 0);
+  --accent-foreground: oklch(25% 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(90% 0 0); /* Light grey border */
+  --input: oklch(95% 0 0); /* Light grey input background */
+  --ring: oklch(70% 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: oklch(100% 0 0); /* White sidebar */
+  --sidebar-foreground: oklch(15% 0 0); /* Dark text on sidebar */
+  --sidebar-primary: oklch(25% 0 0);
+  --sidebar-primary-foreground: oklch(100% 0 0);
+  --sidebar-accent: oklch(95% 0 0);
+  --sidebar-accent-foreground: oklch(25% 0 0);
+  --sidebar-border: oklch(90% 0 0);
+  --sidebar-ring: oklch(70% 0 0);
 }
 
 .dark {
@@ -164,4 +164,83 @@
 
 .logo-clarify {
   animation: clarify-reveal 1.2s ease-out forwards;
+}
+
+/* Enhanced Markdown styling for better visual hierarchy */
+.prose h2 {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1rem !important;
+  color: #1f2937 !important; /* gray-800 */
+  border-bottom: 2px solid #e5e7eb !important; /* gray-200 */
+  padding-bottom: 0.5rem !important;
+}
+
+.prose h3 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.75rem !important;
+  color: #374151 !important; /* gray-700 */
+}
+
+.prose hr {
+  border-top: 2px dashed #d1d5db !important; /* gray-300 */
+  margin: 2rem 0 !important;
+}
+
+.prose strong {
+  color: #111827 !important; /* gray-900 */
+  font-weight: 600 !important;
+}
+
+/* Enhanced bullet point styling */
+.prose ul {
+  margin: 1rem 0 !important;
+  padding-left: 1.5rem !important;
+  list-style-type: none !important;
+}
+
+.prose li {
+  margin: 0.5rem 0 !important;
+  position: relative;
+  padding-left: 1rem !important;
+}
+
+.prose li::before {
+  content: "•";
+  color: #4f46e5 !important; /* indigo-600 */
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+  font-size: 1.2em;
+}
+
+.prose ul li {
+  line-height: 1.6 !important;
+}
+
+/* Table styling for SQL results */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.prose th, .prose td {
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+}
+
+.prose th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.prose tr:nth-child(even) {
+  background-color: #f8fafc;
 }

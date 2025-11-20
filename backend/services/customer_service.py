@@ -183,14 +183,22 @@ class CustomerService:
     
     def get_customer_assessment(self, customer_id: str) -> Optional[CustomerAssessment]:
         """Get customer assessment by customer ID."""
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM customer_assessments WHERE customer_id = ?", (customer_id,))
-            row = cursor.fetchone()
-            
-            if row:
-                return self._row_to_assessment(row)
-            return None
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM customer_assessments WHERE customer_id = ?", (customer_id,))
+                row = cursor.fetchone()
+                
+                if row:
+                    return self._row_to_assessment(row)
+                return None
+        except sqlite3.OperationalError as e:
+            if "no such table: customer_assessments" in str(e):
+                # Table doesn't exist, return None (no assessment data)
+                print(f"⚠️ Warning: customer_assessments table not found, skipping assessment data")
+                return None
+            else:
+                raise e
     
     def update_customer(self, customer_id: str, update_data: Dict[str, Any]) -> Optional[Customer]:
         """Update customer information."""

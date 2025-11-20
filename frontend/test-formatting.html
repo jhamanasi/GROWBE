@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formatting Test</title>
+    <style>
+        .prose { max-width: none; font-family: system-ui, sans-serif; }
+        .prose h2 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 1rem 0; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .prose h3 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.75rem 0; color: #374151; }
+        .prose ul { margin: 1rem 0; padding-left: 1.5rem; list-style-type: none; }
+        .prose li { margin: 0.5rem 0; position: relative; padding-left: 1rem; }
+        .prose li::before { content: "•"; color: #4f46e5; font-weight: bold; position: absolute; left: 0; font-size: 1.2em; }
+        .prose ul li { line-height: 1.6; }
+        .prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+        .prose th, .prose td { padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb; }
+        .prose th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+        .prose tr:nth-child(even) { background-color: #f8fafc; }
+    </style>
+</head>
+<body style="padding: 20px;">
+    <div class="prose">
+        <h2>Understanding PITI</h2>
+        <p>PITI stands for Principal, Interest, Taxes, and Insurance.</p>
+        
+        <h3>Components of PITI:</h3>
+        <ul>
+            <li><strong>Principal:</strong> This is the portion of your monthly payment that goes toward reducing the original amount borrowed.</li>
+            <li><strong>Interest:</strong> This is the cost of borrowing the money, expressed as a percentage of the loan amount.</li>
+            <li><strong>Taxes:</strong> Property taxes are assessed by local governments.</li>
+            <li><strong>Insurance:</strong> This includes homeowners insurance and private mortgage insurance.</li>
+        </ul>
+
+        <h2>Your Credit Card Debt Overview</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Credit Card</th>
+                    <th>Balance</th>
+                    <th>Interest Rate</th>
+                    <th>Minimum Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Card 1</td>
+                    <td>$1,723.56</td>
+                    <td>20.46%</td>
+                    <td>$57.27</td>
+                </tr>
+                <tr>
+                    <td>Card 2</td>
+                    <td>$1,708.36</td>
+                    <td>21.23%</td>
+                    <td>$72.09</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>$3,431.92</strong></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

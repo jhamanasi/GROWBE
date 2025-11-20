@@ -1,0 +1,35 @@
+{"question_id": 1, "expected_answer": "Debt snowball pays off smallest debts first for motivation, while debt avalanche pays highest interest debts first to save money."}
+{"question_id": 2, "expected_answer": "Debt avalanche saves more money over time by eliminating highest interest debt first."}
+{"question_id": 3, "expected_answer": "Only paying minimums leads to accumulating interest, longer payoff time, and higher total cost."}
+{"question_id": 4, "expected_answer": "Minimum payments are typically calculated as a percentage of balance plus interest, usually 2-3% of balance."}
+{"question_id": 5, "expected_answer": "Debt snowball works better for psychological motivation and momentum when debts are similar in interest rates."}
+{"question_id": 6, "expected_answer": "Revolving debt has flexible payments and no fixed term, installment debt has fixed payments and term."}
+{"question_id": 7, "expected_answer": "High-interest debt costs more over time due to compound interest, so paying it first saves money."}
+{"question_id": 8, "expected_answer": "Balance transfer moves debt to lower interest card, helping repay faster and save on interest."}
+{"question_id": 9, "expected_answer": "Balance transfers risk higher fees, rate increases after promotional period, and credit score impact."}
+{"question_id": 10, "expected_answer": "Debt consolidation combines multiple debts into single loan with potentially lower interest or payments."}
+{"question_id": 11, "expected_answer": "Avoid consolidation if rates are higher, you have poor credit, or you continue spending habits."}
+{"question_id": 12, "expected_answer": "Good credit utilization is below 30% of available credit limits."}
+{"question_id": 13, "expected_answer": "Late payments lower credit score by 30-100 points and stay on report for 7 years."}
+{"question_id": 14, "expected_answer": "Daily simple interest is calculated by multiplying balance by rate divided by 365."}
+{"question_id": 15, "expected_answer": "Extra principal payments reduce balance faster, decreasing future interest calculations."}
+{"question_id": 18, "expected_answer": "PMI protects lender against default, required when down payment is less than 20%."}
+{"question_id": 23, "expected_answer": "Front-end DTI includes housing costs, back-end includes all debt payments."}
+{"question_id": 26, "expected_answer": "Payment history is 35% of credit score, most important factor."}
+{"question_id": 27, "expected_answer": "Credit scores increase 1-3 points per month with consistent on-time payments."}
+{"question_id": 29, "expected_answer": "Hard inquiries lower score by few points, stay for 2 years on report."}
+{"question_id": 56, "expected_answer": "Federal loans have fixed rates and benefits, private loans vary by lender."}
+{"question_id": 57, "expected_answer": "Income-driven repayment caps payments at percentage of discretionary income."}
+{"question_id": 58, "expected_answer": "Forbearance temporarily pauses payments, interest may still accrue."}
+{"question_id": 59, "expected_answer": "Deferment pauses payments and interest accrual for certain situations."}
+{"question_id": 60, "expected_answer": "Student loan forgiveness available for public service, teachers, nurses after 10 years."}
+{"question_id": 61, "expected_answer": "401(k) loan allows borrowing up to 50% or $50,000 from retirement savings."}
+{"question_id": 62, "expected_answer": "401(k) loans have 5-year repayment, interest paid back to your account."}
+{"question_id": 63, "expected_answer": "401(k) hardship withdrawal incurs taxes and penalties, should be last resort."}
+{"question_id": 64, "expected_answer": "Required Minimum Distribution starts at age 73, must withdraw annually."}
+{"question_id": 65, "expected_answer": "Roth conversion moves money from traditional to Roth IRA, paying taxes now for tax-free withdrawals later."}
+{"question_id": 66, "expected_answer": "Backdoor Roth IRA allows high earners to contribute through conversion."}
+{"question_id": 67, "expected_answer": "SEP IRA for self-employed, higher contribution limits than traditional IRA."}
+{"question_id": 68, "expected_answer": "SIMPLE IRA easier setup than 401(k), lower contribution limits."}
+{"question_id": 69, "expected_answer": "529 plan contributions grow tax-free, withdrawals tax-free for qualified education."}
+{"question_id": 70, "expected_answer": "Coverdell ESA $2,000 annual limit, can be used for K-12 education expenses."}

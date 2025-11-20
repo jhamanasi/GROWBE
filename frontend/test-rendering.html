@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Markdown Rendering Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react-markdown@8.0.7/dist/react-markdown.js"></script>
+    <script src="https://unpkg.com/remark-gfm@4.0.1/dist/remark-gfm.js"></script>
+    <script src="https://unpkg.com/@tailwindcss/typography@0.5.19/dist/typography.min.js"></script>
+    <script>
+        const { createElement, useState } = React;
+        const { createRoot } = ReactDOM;
+        const ReactMarkdown = window.ReactMarkdown.default;
+        const remarkGfm = window.remarkGfm.default;
+        
+        function TestComponent() {
+            const markdownContent = `## Financial Health Summary for Maya Patel
+
+**Net Worth:** $29,852.74 (Liquid: $23,039.05)
+
+**Debt-to-Income Ratio:**
+- Front-end (Housing): 25.1%
+- Back-end (Total): 0.0%
+
+**Monthly Cash Flow:**
+- Income: $4,139.14
+- Expenses: $2,290.03
+- Surplus: $1,849.11
+
+**Credit Health:**
+- FICO Score: 684 📉
+- Credit Utilization: 17.3%
+
+---
+
+### Key Insights
+
+- Your **net worth** is positive, which is a great indicator of your financial health!
+  
+- Your **debt-to-income ratio** is healthy, especially since your back-end ratio is at 0.0%, indicating no total debt payments relative to your income.
+
+- You're generating a **monthful surplus** of $1,849.11, which means you're saving a good portion of your income.
+
+- Your **credit utilization** is at 17.3%, well below the recommended threshold of 30%, which is excellent for your credit score.
+
+---
+
+If you have any questions or would like to explore specific areas further, just let me know! 😊`;
+
+            return createElement('div', { className: 'prose prose-sm max-w-none' },
+                createElement(ReactMarkdown, { remarkPlugins: [remarkGfm] }, markdownContent)
+            );
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const root = createRoot(document.getElementById('root'));
+            root.render(createElement(TestComponent));
+        });
+    </script>
+    <style>
+        .prose { max-width: none !important; }
+        body { font-family: system-ui, sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Markdown Rendering Test</h1>
+    <p>This tests if ReactMarkdown + remarkGfm + Tailwind Typography render headers properly:</p>
+    <div id="root"></div>
+</body>
+</html>

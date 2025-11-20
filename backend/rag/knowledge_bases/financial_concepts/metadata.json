@@ -1,0 +1,28 @@
+{
+  "name": "financial_concepts",
+  "description": "Core personal finance concepts: interest rates, APR, DTI, credit scores, amortization, debt strategies, student loans, mortgages. Use when user asks 'what is...', 'how does... work', 'explain...', or needs educational context for financial advice.",
+  "topics": [
+    "credit_health",
+    "debt_management",
+    "housing",
+    "student_loans",
+    "credit_scoring",
+    "loan_amortization",
+    "repayment_strategies",
+    "mortgage_basics",
+    "affordability_metrics"
+  ],
+  "priority": 1,
+  "embedding_model": "text-embedding-3-small",
+  "chunk_size": 512,
+  "overlap": 0,
+  "retrieval_params": {
+    "top_k": 3,
+    "similarity_threshold": 0.3
+  },
+  "version": "1.0",
+  "last_updated": "2025-01-14",
+  "total_chunks": 42,
+  "notes": "Pre-curated chunks with optimal size (50-150 tokens each). No additional chunking needed. Each chunk is semantically complete and self-contained."
+}
+

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Send, Bot, User, Sparkles, DollarSign, ArrowLeft } from 'lucide-react'
@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import 'katex/dist/katex.min.css'
 import SQLDetailsPanel from '@/components/SQLDetailsPanel'
+import CalculationDetailsPanel from '@/components/CalculationDetailsPanel'
 import MathDisplay from '@/components/MathDisplay'
 // Removed popup interactive components to reduce latency and simplify UX
 // import InlineSQLChart from '@/components/InlineSQLChart'
@@ -52,6 +53,20 @@ interface SQLDetails {
   chart_config?: ChartConfig;
 }
 
+interface CalculationStep {
+  title: string;
+  description: string;
+  latex: string;
+  display: boolean;
+}
+
+interface CalculationDetails {
+  scenario_type: string;
+  calculation_steps?: CalculationStep[];
+  latex_formulas?: string[];
+  tool_name?: string;
+}
+
 interface InteractiveComponent {
   type: string;
   config: Record<string, unknown>;
@@ -64,6 +79,7 @@ interface Message {
   isUser: boolean
   timestamp: number
   sqlDetails?: SQLDetails
+  calculationDetails?: CalculationDetails
   interactiveComponent?: InteractiveComponent
   guidance?: string
 }
@@ -117,6 +133,7 @@ function ChatPageContent() {
   const streamingContext = useStreamingContext();
   const isStreaming = streamingContext?.isStreaming ?? true;
   const searchParams = useSearchParams();
+  const router = useRouter();
   const customerId = searchParams.get('customerId');
   const userType = searchParams.get('userType'); // 'existing' or 'new'
   
@@ -131,6 +148,13 @@ function ChatPageContent() {
   // Customer context state
   const [customerContext, setCustomerContext] = useState<CustomerContext | null>(null)
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false)
+
+  // NEW: Redirect to the new persistent conversations UI with sidebar
+  useEffect(() => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    const query = params.toString();
+    router.replace(`/conversations${query ? `?${query}` : ''}`);
+  }, []);
 
   // Interactive components disabled
 
@@ -203,13 +227,20 @@ function ChatPageContent() {
   // Stream an assistant-initiated message without adding a user bubble
   const streamAgentMessage = async (prompt: string) => {
     try {
+      // Build conversation history from messages
+      const history = messages.map(msg => ({
+        role: msg.isUser ? 'user' : 'assistant',
+        content: msg.content
+      }))
+      
       const response = await fetch('http://localhost:8000/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: prompt,
           session_id: customerId,
-          user_type: userType
+          user_type: userType,
+          history: history  // Include conversation history
         })
       });
 
@@ -248,6 +279,9 @@ function ChatPageContent() {
             if (data?.sql_details) {
               setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m));
             }
+            if (data?.calculation_details) {
+              setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, calculationDetails: data.calculation_details } : m));
+            }
           } catch {}
         }
       }
@@ -264,6 +298,9 @@ function ChatPageContent() {
               }
               if (data?.sql_details) {
                 setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m));
+              }
+              if (data?.calculation_details) {
+                setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, calculationDetails: data.calculation_details } : m));
               }
             } catch {}
           }
@@ -292,13 +329,14 @@ function ChatPageContent() {
     }
   };
 
-  const addMessage = (content: string, isUser: boolean, sqlDetails?: SQLDetails, interactiveComponent?: InteractiveComponent, guidance?: string) => {
+  const addMessage = (content: string, isUser: boolean, sqlDetails?: SQLDetails, calculationDetails?: CalculationDetails, interactiveComponent?: InteractiveComponent, guidance?: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       content,
       isUser,
       timestamp: Date.now(),
       sqlDetails,
+      calculationDetails,
       interactiveComponent,
       guidance
     }
@@ -314,6 +352,12 @@ function ChatPageContent() {
     setIsLoading(true)
 
     try {
+      // Build conversation history from messages (exclude current message)
+      const history = messages.map(msg => ({
+        role: msg.isUser ? 'user' : 'assistant',
+        content: msg.content
+      }))
+      
       // Streamed chat: connect to /chat/stream and append chunks as they arrive
       const response = await fetch('http://localhost:8000/chat/stream', {
         method: 'POST',
@@ -321,7 +365,8 @@ function ChatPageContent() {
         body: JSON.stringify({
           message: message,
           session_id: customerId,
-          user_type: userType
+          user_type: userType,
+          history: history  // Include conversation history
         })
       })
 
@@ -359,6 +404,9 @@ function ChatPageContent() {
               if (data?.sql_details) {
                 setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m))
               }
+              if (data?.calculation_details) {
+                setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, calculationDetails: data.calculation_details } : m))
+              }
             } catch (e) {
               // ignore malformed chunks
             }
@@ -377,6 +425,9 @@ function ChatPageContent() {
                 }
                 if (data?.sql_details) {
                   setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, sqlDetails: data.sql_details } : m))
+                }
+                if (data?.calculation_details) {
+                  setMessages(prev => prev.map(m => m.id === agentMessageId ? { ...m, calculationDetails: data.calculation_details } : m))
                 }
               } catch {}
             }
@@ -415,9 +466,9 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+    <div className="h-screen bg-gray-50 flex flex-col">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -427,6 +478,7 @@ function ChatPageContent() {
               <div>
               <h1 className="text-lg font-bold text-gray-900">Growbe</h1>
               <p className="text-sm text-gray-600">Chat with Growbe</p>
+              <div className="text-xs text-green-600 font-medium">✓ Sticky Input Active</div>
               </div>
             </div>
             <Link href="/">
@@ -439,8 +491,8 @@ function ChatPageContent() {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Messages - Fixed height calculation */}
+      <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 120px)' }}>
         <div className="max-w-4xl mx-auto px-4 py-6">
           {messages.length === 0 && !isLoadingSuggestions ? (
             <SuggestionCards
@@ -492,6 +544,13 @@ function ChatPageContent() {
                           </div>
                         )}
 
+                        {/* Calculation Details */}
+                        {message.calculationDetails && (
+                          <div className="mt-3">
+                            <CalculationDetailsPanel calculationDetails={message.calculationDetails} />
+                          </div>
+                        )}
+
                         {/* Timestamp */}
                         <div className={`text-xs text-gray-500 mt-1 ${message.isUser ? 'text-right' : 'text-left'}`}>
                           {formatTimestamp(message.timestamp)}
@@ -526,8 +585,8 @@ function ChatPageContent() {
         </div>
       </div>
 
-      {/* Input */}
-      <div className="bg-white border-t">
+      {/* Fixed Input at Bottom */}
+      <div className="flex-shrink-0 bg-white border-t shadow-lg bg-gradient-to-r from-green-50 to-blue-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex space-x-3">
             <Input
