@@ -36,6 +36,15 @@
 - **Debt Management**: Get personalized debt snowball/avalanche strategies
 - **Financial Planning**: Long-term wealth building and retirement planning
 
+### 📸 Screenshots
+
+#### Landing Page
+![Growbe Landing Page](./screenshots/landing-page.png)
+
+#### Chat Interface
+![Growbe Chat Interface 1](./screenshots/chat-interface1.png)
+![Growbe Chat Interface 2](./screenshots/chat-interface2.png)
+
 ---
 
 ## 🚀 Quick Start
