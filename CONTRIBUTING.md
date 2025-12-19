@@ -29,8 +29,8 @@ Thank you for your interest in contributing to **Growbe**! This document provide
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/growbe.git
-   cd growbe
+   git clone https://github.com/jhamanasi/GROWBE.git
+   cd GROWBE
    ```
 
 2. **Follow the setup instructions** in the main README.md

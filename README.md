@@ -53,8 +53,8 @@ Get Growbe running locally in **5 minutes**:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/growbe.git
-cd growbe
+git clone https://github.com/jhamanasi/GROWBE.git
+cd GROWBE
 
 # Setup backend
 cd backend
@@ -102,8 +102,8 @@ Visit `http://localhost:3001` and start chatting with Growbe!
 ### Step 1: Clone and Navigate
 
 ```bash
-git clone https://github.com/yourusername/growbe.git
-cd growbe
+git clone https://github.com/jhamanasi/GROWBE.git
+cd GROWBE
 ```
 
 ### Step 2: Backend Setup
@@ -648,7 +648,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Getting Help
 - **Documentation**: Check our [docs](docs/) folder
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/yourusername/growbe/issues)
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/jhamanasi/GROWBE/issues)
 - **Discussions**: Join community discussions
 
 ### Contact
