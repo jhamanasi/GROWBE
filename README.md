@@ -651,9 +651,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/jhamanasi/GROWBE/issues)
 - **Discussions**: Join community discussions
 
-### Contact
-- **Email**: p.kusha@gwu.edu
-
 ---
 
 ## 🗺️ Roadmap
